@@ -24,7 +24,7 @@ my @availActions = ();
 
 say "Добро пожаловать в игру $game{NAME}!";
 say "Автор игры: $game{AUTHOR}";
-say "Нажмите любую клавишу, чтобы начать.";
+say "Нажмите Enter, чтобы начать.";
 my $c = <STDIN>;
 
 Pause();
@@ -93,7 +93,7 @@ sub GetAction {
 	
     my $c = prompt -stdio, -complete => \@autocomplist;
 	Pause();
-	printf "> ";
+	printf "\n";
 
 	for my $action (@availActions) {
 		if ($c eq $action->{NAME}) { return $action; }
