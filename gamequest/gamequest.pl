@@ -6,6 +6,7 @@ use Time::HiRes ('sleep');
 use IO::Prompter;
 
 
+
 my ($fileName) = @ARGV;
 die "Не указан файл игры.\n" unless $fileName;
 
@@ -90,7 +91,7 @@ sub GetAction {
 		push @autocomplist, $action->{NAME};
 	}
 	
-    my $c = prompt -complete => \@autocomplist;
+    my $c = prompt -stdio, -complete => \@autocomplist;
 	Pause();
 	printf "> ";
 
