@@ -54,7 +54,7 @@ def GetStockAt(dtime):
     try:
         data = STOCK['price'][STOCK['timestamp'].index(Timestamp(dtime))]
         data.append(STOCK['volume'][STOCK['timestamp'].index(Timestamp(dtime))][0])
-        print data
+        #print data
         return data
     except ValueError:
         return []
@@ -68,25 +68,25 @@ def GetMediumStockDay(dtime):
     except ValueError:
         return []
     
-    data = STOCK['price'][i]
-    data.append(STOCK['volume'][i][0])
-    hi = data[0]
-    lo = data[1]
-    op = data[2]
+    dat = STOCK['price'][i]
+    dat.append(STOCK['volume'][i][0])
+    hi = dat[0]
+    lo = dat[1]
+    op = dat[2]
     
-    vl = data[4]
+    vl = dat[4]
     
     while i < i_max:
         i += 1
-        data = STOCK['price'][i]
-        data.append(STOCK['volume'][i][0])
-        if hi < data[0]:
-            hi = data[0]
-        if lo > data[1]:
-            lo = data[1]
-        vl += data[4]
+        dat = STOCK['price'][i]
+        dat.append(STOCK['volume'][i][0])
+        if hi < dat[0]:
+            hi = dat[0]
+        if lo > dat[1]:
+            lo = dat[1]
+        vl += dat[4]
     
-    cl = data[3]
+    cl = dat[3]
     return [hi, lo, op, cl, vl]
 
 
@@ -106,8 +106,22 @@ def GetMediumStockDaysBack(current_day, back_days):
     return []
 
 
+def Norm(values, base):
+    if type(values) != list:
+        return (values - base['price']) / base['price']
+    result = []
+    for price in values[0:-1]:
+        result.append((price - base['price']) / base['price'])
+    #result.append((values[-1] - base['volume']) / base['volume'])
+    result.append((values[-1] + 0.0) / base['volume'])
+    return result
+
+
 
 extract_days, extract_file = ParseArgs(sys.argv)
+if extract_file == '' or extract_file == '-h' or extract_file == '--help':
+    Die("Usage: " + sys.argv[0] + " [days] FILE")
+    
 if not FileExists(extract_file):
     Die("ERROR: file " + extract_file + " not available")
 
@@ -132,7 +146,51 @@ print "Extract", extract_days, "days"
 
 
 
+base = {}
 extracted = {}
+
+
+
+
+def ProcessExtractedData():
+    raw = []
+    for val in extracted['d-3']:
+        raw.append(val)
+    for val in extracted['d-2']:
+        raw.append(val)
+    for val in extracted['d-1']:
+        raw.append(val)
+    for val in extracted['9_55']:
+        raw.append(val)
+    for val in extracted['10_00']:
+        raw.append(val)
+    for val in extracted['10_05']:
+        raw.append(val)
+    for val in extracted['10_10']:
+        raw.append(val)
+    for val in extracted['10_15']:
+        raw.append(val)
+    for val in extracted['10_20']:
+        raw.append(val)
+    for val in extracted['10_25']:
+        raw.append(val)
+    for val in extracted['10_30']:
+        raw.append(val)
+    for val in extracted['10_35']:
+        raw.append(val)
+    for val in extracted['10_40']:
+        raw.append(val)
+    for val in extracted['10_45']:
+        raw.append(val)
+    for val in extracted['10_50']:
+        raw.append(val)
+    for val in extracted['10_55']:
+        raw.append(val)
+    #print len(raw), raw
+
+
+
+
 dayx = stock_begin
 i = 0
 
@@ -153,26 +211,32 @@ while i < extract_days:
     day_opened = GetStockAt(dayx.replace(hour=9,  minute=55))
     if not len(day_opened):
         continue
+    base['price']  = back_1day[3] + 0.0
+    base['volume'] = back_1day[4] + 0.0
     
-    extracted['d-3'] = back_3days
-    extracted['d-2'] = back_2days
-    extracted['d-1'] = back_1day
-    extracted['9_55']    = day_opened
-    extracted['10_00']   = GetStockAt(dayx.replace(hour=10, minute=00))
-    extracted['10_05']   = GetStockAt(dayx.replace(hour=10, minute=05))
-    extracted['10_10']   = GetStockAt(dayx.replace(hour=10, minute=10))
-    extracted['10_15']   = GetStockAt(dayx.replace(hour=10, minute=15))
-    extracted['10_20']   = GetStockAt(dayx.replace(hour=10, minute=20))
-    extracted['10_25']   = GetStockAt(dayx.replace(hour=10, minute=25))
-    extracted['10_30']   = GetStockAt(dayx.replace(hour=10, minute=30))
-    extracted['10_35']   = GetStockAt(dayx.replace(hour=10, minute=35))
-    extracted['10_40']   = GetStockAt(dayx.replace(hour=10, minute=40))
-    extracted['10_45']   = GetStockAt(dayx.replace(hour=10, minute=45))
-    extracted['10_50']   = GetStockAt(dayx.replace(hour=10, minute=50))
-    extracted['10_55']   = GetStockAt(dayx.replace(hour=10, minute=55))
-    extracted['day_sum'] = GetMediumStockDay(dayx)
-    print str(i+1)+":", StrDt(dayx)
+    extracted['d-3'] = Norm(back_3days[0:5], base)
+    extracted['d-2'] = Norm(back_2days[0:5], base)
+    extracted['d-1'] = Norm(back_1day[0:5], base)
+    extracted['9_55']    = Norm(day_opened[0:5], base)
+    extracted['10_00']   = Norm(GetStockAt(dayx.replace(hour=10, minute=00))[0:5], base)
+    extracted['10_05']   = Norm(GetStockAt(dayx.replace(hour=10, minute=05))[0:5], base)
+    extracted['10_10']   = Norm(GetStockAt(dayx.replace(hour=10, minute=10))[0:5], base)
+    extracted['10_15']   = Norm(GetStockAt(dayx.replace(hour=10, minute=15))[0:5], base)
+    extracted['10_20']   = Norm(GetStockAt(dayx.replace(hour=10, minute=20))[0:5], base)
+    extracted['10_25']   = Norm(GetStockAt(dayx.replace(hour=10, minute=25))[0:5], base)
+    extracted['10_30']   = Norm(GetStockAt(dayx.replace(hour=10, minute=30))[0:5], base)
+    extracted['10_35']   = Norm(GetStockAt(dayx.replace(hour=10, minute=35))[0:5], base)
+    extracted['10_40']   = Norm(GetStockAt(dayx.replace(hour=10, minute=40))[0:5], base)
+    extracted['10_45']   = Norm(GetStockAt(dayx.replace(hour=10, minute=45))[0:5], base)
+    extracted['10_50']   = Norm(GetStockAt(dayx.replace(hour=10, minute=50))[0:5], base)
+    extracted['10_55']   = Norm(GetStockAt(dayx.replace(hour=10, minute=55))[0:5], base)
+    extracted['day_sum'] = Norm(GetMediumStockDay(dayx)[0:5], base)
+    print str(i+1)+":", StrDt(dayx), ", base price", base['price'], ", base volume", base['volume']
     print json.dumps(extracted)
+    
+    ProcessExtractedData()
+    
+    
     print ""
     extracted = {}
     i += 1
