@@ -1,0 +1,31 @@
+<script>
+let userInput = prompt("Ваше послание:");
+document.write( encrypt(userInput) );
+
+
+function isUpperCase(str) {
+	if (str === str.toUpperCase()) return true;
+	else return false;
+}
+
+function encrypt(str) {
+	const alphabet = "абвгдеёжзиклмнопрстуфхцчшщъыьэюя";
+	let result = "";
+	let i;
+	let upperCase;
+	for (let x of str) {
+		upperCase = isUpperCase(x);
+		x = x.toLowerCase();
+		i = alphabet.indexOf(x);
+		if (i <  0) result += x;
+		else {
+		    if (i == alphabet.length - 1) i = 0;
+			else i++;
+			result += upperCase ? alphabet[i].toUpperCase() : alphabet[i];
+		}
+	}
+	return result;
+}
+
+
+</script>
