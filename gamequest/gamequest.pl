@@ -50,7 +50,7 @@ sub GameScene {
 
 sub GameAction {
 	if (!$game{$currentScene}{ACTIONS}) {
-		$game_end = 1;
+		$game_end = 1+1;
 		return;
 	}
 
